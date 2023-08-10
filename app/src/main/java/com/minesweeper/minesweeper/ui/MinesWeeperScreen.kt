@@ -2,28 +2,28 @@ package com.minesweeper.minesweeper.ui
 
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.minesweeper.R
 import com.minesweeper.minesweeper.domain.CellType
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
+import com.mineweeper.R
 import kotlinx.coroutines.delay
 import java.util.*
 import kotlin.time.Duration.Companion.seconds
+import androidx.compose.ui.Alignment.Companion as Alignment
 
 //Metodo raíz de los composable
 //Implementamos una caja e inicializamos dentro de ella el tablero, la
@@ -111,8 +111,7 @@ fun TextBombPanel() {
         stringResource(R.string.bombsLeft),
         color = Color.Black,
         fontSize = 15.sp,
-        fontWeight = FontWeight.Bold
-    )
+        fontWeight = FontWeight.Bold)
 }
 
 //Card indicativo del número de bombas
@@ -122,22 +121,23 @@ fun CardBombPanel(modifier: Modifier, viewModel: MinesWeeperViewModel) {
         modifier = modifier
             .border(BorderStroke(1.dp, Color.Black))
             .width(100.dp)
-            .height(60.dp),
-        backgroundColor = Color.Black,
-    ) { TextNumberBombs(modifier, viewModel) }
+            .height(60.dp)
+            .background(Color.Black)
+    ) { TextNumberBombs(viewModel) }
 }
 
 //Texto indicativo del número de bombas del card
 @Composable
-fun TextNumberBombs(modifier: Modifier, viewModel: MinesWeeperViewModel) {
-    Text(
-        viewModel.numberBombs.toString(),
-        color = Color.Red,
-        fontSize = 30.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = modifier.padding(5.dp, 5.dp , 10.dp, 5.dp),
-        textAlign = TextAlign.End,
-    )
+fun TextNumberBombs(viewModel: MinesWeeperViewModel) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            viewModel.numberBombs.toString(),
+            color = Color.Red,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.End).padding(5.dp, 5.dp, 10.dp, 5.dp)
+        )
+    }
 }
 
 //Panel del temporizador. Igual que con el de bombas creamos una columna con
@@ -158,7 +158,7 @@ fun TextTimerPanel() {
         stringResource(R.string.time),
         color = Color.Black,
         fontSize = 15.sp,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
     )
 }
 
@@ -173,7 +173,7 @@ fun Timer(modifier: Modifier, viewModel: MinesWeeperViewModel) {
     //tenga un retraso de un segundo. Por cada iteración aumentamos la
     //variable de estado declarada anteriormente
     LaunchedEffect(Unit) {
-        while(!viewModel.isEnded) {
+        while (!viewModel.isEnded) {
             delay(1.seconds)
             ticks++
         }
@@ -184,70 +184,80 @@ fun Timer(modifier: Modifier, viewModel: MinesWeeperViewModel) {
         modifier = modifier
             .border(BorderStroke(1.dp, Color.Black))
             .width(150.dp)
-            .height(60.dp),
-        backgroundColor = Color.White,
-        contentColor = Color.Red
-    ) {TextNumbersTimer(ticks, modifier)}
+            .height(60.dp)
+            .background(Color.White),
+    ) {TextNumbersTimer(ticks) }
 }
+
 
 //Texto que muestra el contador del temporizador
 @Composable
-fun TextNumbersTimer(ticks: Int, modifier: Modifier){
-    Text(
-        ticks.toString(),
-        color = Color.Red,
-        fontSize = 30.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = modifier.padding(5.dp, 5.dp , 10.dp, 5.dp),
-        textAlign = TextAlign.End,
-    )
+fun TextNumbersTimer(ticks: Int) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            ticks.toString(),
+            color = Color.Red,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.End).padding(5.dp, 5.dp, 10.dp, 5.dp),
+            textAlign = TextAlign.End
+        )
+    }
 }
+
 
 //Pinta el tablero de juego
 @Composable
-fun Table(modifier: Modifier, viewModel: MinesWeeperViewModel) {
+fun Table(modifier:Modifier, viewModel: MinesWeeperViewModel) {
 
     //Utilizamos el componente lazyverticalgrid para organizar una lista
     //de elementos en una cuadricula (grid). En cada celda pintamos una
     //CardCellTable
     LazyVerticalGrid(
         columns = GridCells.Adaptive(38.dp),
-        content = {
+    ){
             items(viewModel.size * viewModel.size) { cell ->
-                CardCellTable(cell, viewModel)
+                CardCellTable(modifier, cell, viewModel)
             }
-        })
+    }
 }
 
 //Pinta una celda del tablero de juego
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun CardCellTable(numberCell: Int, viewModel: MinesWeeperViewModel) {
+fun CardCellTable(modifier:Modifier, numberCell: Int, viewModel: MinesWeeperViewModel) {
 
     //Obtenemos el estado y la visibilidad de la celda
-    val state =viewModel.getStateOfCell(numberCell)
+    val state = viewModel.getStateOfCell(numberCell)
     val isVisibleCell = viewModel.isVisibleCell(numberCell)
 
     //Implementamos el card
     Card(
-        modifier = Modifier
+        colors = CardDefaults.cardColors(containerColor = viewModel.getBackgroundCellTable(numberCell)),
+        modifier = modifier
             .border(BorderStroke(1.dp, Color.Black))
             .width(38.dp)
             .height(38.dp)
-            .clickable { viewModel.onClickCell(numberCell) },
-        contentColor = Color.Black,
-        backgroundColor = viewModel.getBackgroundCellTable(numberCell)
+            .clickable { viewModel.onClickCell(numberCell) }
     ) {
+        BoxCell(modifier, state, isVisibleCell)
+    }
+}
+
+@Composable
+fun BoxCell(modifier:Modifier, state:CellType, isVisibleCell:Boolean){
+    Box(modifier = modifier) {
         //Si la celda es visible. Mostramos el tipo de celda según corresponda
         if (isVisibleCell) {
             when (state) {
                 CellType.BOMB -> BombImageCell()
-                CellType.VOID -> TextCell("")
+                CellType.VOID -> TextCell("" )
                 else -> TextCell(state.value.toString())
             }
         }
     }
 }
+
 
 //Crea una imagen con el icono de la bomba
 @Composable
@@ -266,10 +276,12 @@ fun BombImageCell() {
 //Crea un texto con el número de bombas que tiene alrededor la bomba
 @Composable
 fun TextCell(number: String) {
-    Text(
-        text = number,
-        textAlign = TextAlign.Center,
-        fontSize = 30.sp,
-        fontWeight = FontWeight.Bold
-    )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = number,
+            modifier =Modifier.align(Alignment.CenterHorizontally),
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
 }

@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.minesweeper.minesweeper.domain.Cell
 import com.minesweeper.minesweeper.domain.CellType
+import com.minesweeper.minesweeper.ui.MinesWeeperViewModel
 
 //Clase ViewModel
 class MinesWeeperViewModel: ViewModel() {
@@ -152,16 +153,16 @@ class MinesWeeperViewModel: ViewModel() {
     fun getBackgroundCellTable(numberCell:Int): Color{
         val state = getStateOfCell(numberCell)
         return if(isVisibleCell(numberCell)) {
-            when (state) {
-                CellType.VOID -> Color(0xFFCACCCC)
-                CellType.ONE -> Color(0xFF6AC1E9)
-                CellType.TWO -> Color(0xFFCF7D62)
-                CellType.THREE -> Color(0xFF8FD691)
-                else -> Color(0xFFCACCCC)
-            }
-        }else{
-            Color(0xFF868A87)
-        }
+                    when (state) {
+                        CellType.VOID -> Color(0xFFCACCCC)
+                        CellType.ONE -> Color(0xFF6AC1E9)
+                        CellType.TWO -> Color(0xFFCF7D62)
+                        CellType.THREE -> Color(0xFF8FD691)
+                        else -> Color(0xFFCACCCC)
+                    }
+                }else{
+                    Color(0xFF868A87)
+                }
     }
 
     //Función que se ejecuta tras una click en una celda del tablero
@@ -212,7 +213,7 @@ class MinesWeeperViewModel: ViewModel() {
         //Si la decisión es continuar, seguimos recorriendo celdas
         //en caso contrario paramos y mostramos el contenido de la
         //celda donde nos hemos detenido siempre que no sea una bomba
-        if(decision == MinesWeeperViewModel.Decision.CONTINUE) {
+        if(decision == Decision.CONTINUE) {
             traverseCells(numberCell)
         }else if (decision == Decision.STOP){
             if(getStateOfCell(numberCell) != CellType.BOMB)
